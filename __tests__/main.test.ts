@@ -1,5 +1,5 @@
 import {wait} from '../src/wait'
-import {parsePairs} from '../src/parse-pairs'
+import {parseParams} from '../src/parse-params'
 import * as process from 'process'
 import * as cp from 'child_process'
 import * as path from 'path'
@@ -29,16 +29,16 @@ test('test runs', () => {
   console.log(cp.execFileSync(np, [ip], options).toString())
 })
 
-test('parse input pairs', () => {
-  const pairs = {
+test('parse input params', () => {
+  const parsed = {
     VARIABLE1: '/good/variable',
     VARIABLE2: '/another/good/variable',
     SECRET1: '/good/secret'
   }
-  const input = `
+  const params = `
     VARIABLE1=/good/variable
     VARIABLE2=/another/good/variable
     SECRET1=/good/secret
   `
-  expect(pairs == parsePairs(input))
+  expect(parsed == parseParams(params))
 })
