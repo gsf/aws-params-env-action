@@ -4,8 +4,12 @@ updates:
     directory: /
     schedule:
       interval: daily
+    # Security updates only
+    open-pull-requests-limit: 0
 
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: daily
+    # Security updates only
+    open-pull-requests-limit: 0
