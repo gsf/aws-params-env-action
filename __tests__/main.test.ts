@@ -43,7 +43,7 @@ test('parse input params', () => {
   const parsed = {
     VARIABLE1: '/good/variable',
     VARIABLE2: '/another/good/variable',
-    SECRET1: '/good/secret',
+    SECRET1: '/good/secret'
   }
   expect(parseParams(params)).toStrictEqual(parsed)
 })
@@ -56,42 +56,42 @@ test('get param values from AWS', async () => {
       {
         Name: '/a/variable',
         Type: 'String',
-        Value: 'variable a value',
+        Value: 'variable a value'
       },
       {
         Name: '/b/variable',
         Type: 'String',
-        Value: 'variable b value',
+        Value: 'variable b value'
       },
       {
         Name: '/a/secret',
         Type: 'SecureString',
-        Value: 'secret a value',
-      },
+        Value: 'secret a value'
+      }
     ]
   })
   const parsed = {
     VARIABLE_A: '/a/variable',
     VARIABLE_B: '/b/variable',
-    SECRET_A: '/a/secret',
+    SECRET_A: '/a/secret'
   }
   const retrieved = await getParams(parsed)
   const expected = [
     {
       name: 'VARIABLE_A',
       value: 'variable a value',
-      secret: false,
+      secret: false
     },
     {
       name: 'VARIABLE_B',
       value: 'variable b value',
-      secret: false,
+      secret: false
     },
     {
       name: 'SECRET_A',
       value: 'secret a value',
-      secret: true,
-    },
+      secret: true
+    }
   ]
   expect(retrieved).toStrictEqual(expected)
 })
@@ -105,18 +105,18 @@ test('set environment variables', () => {
     {
       name: 'VARIABLE_A',
       value: 'variable a value',
-      secret: false,
+      secret: false
     },
     {
       name: 'VARIABLE_B',
       value: 'variable b value',
-      secret: false,
+      secret: false
     },
     {
       name: 'SECRET_A',
       value: 'secret a value',
-      secret: true,
-    },
+      secret: true
+    }
   ]
   setEnv(retrievedParams)
   expect(mockedExportVariable.mock.calls).toHaveLength(3)
