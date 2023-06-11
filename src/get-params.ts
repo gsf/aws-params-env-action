@@ -1,30 +1,32 @@
 import {SSMClient, GetParametersCommand} from '@aws-sdk/client-ssm'
 
 export type RetrievedParam = {
-  name: string,
-  value: string,
-  secret: boolean,
+  name: string
+  value: string
+  secret: boolean
 }
 
-export const getParams = async (paramsObj: Record<string, string>): Promise<RetrievedParam[]> => {
+export const getParams = async (
+  paramsObj: Record<string, string>
+): Promise<RetrievedParam[]> => {
   const client = new SSMClient({})
   const input = {
     Names: Object.values(paramsObj),
-    WithDecryption: true,
+    WithDecryption: true
   }
   const command = new GetParametersCommand(input)
   const response = await client.send(command)
   const params = response.Parameters
-  var retrieved: RetrievedParam[] = []
+  const retrieved: RetrievedParam[] = []
   if (!params) return retrieved
   const envVars = Object.keys(paramsObj)
-  for (var i=0; i < params.length; i++) {
+  for (let i = 0; i < params.length; i++) {
     const param = params[i]
     if (!param.Value) continue
     retrieved.push({
       name: envVars[i],
       value: param.Value,
-      secret: param.Type == 'SecureString',
+      secret: param.Type === 'SecureString'
     })
   }
   return retrieved
@@ -48,4 +50,3 @@ export const getParams = async (paramsObj: Record<string, string>): Promise<Retr
 //     'STRING_VALUE',
 //   ],
 // };
-
