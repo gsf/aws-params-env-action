@@ -1,9 +1,13 @@
+import {getInput, error, setSecret, exportVariable, info} from "@actions/core"
+import {mockClient} from "aws-sdk-client-mock"
+import {SSMClient, GetParametersCommand} from "@aws-sdk/client-ssm"
 import {wait} from '../src/wait'
 import {parseParams} from '../src/parse-params'
+import {getParams} from '../src/get-params'
 import * as process from 'process'
 import * as cp from 'child_process'
 import * as path from 'path'
-import {expect, test} from '@jest/globals'
+import {expect, test, jest} from '@jest/globals'
 
 test('throws invalid number', async () => {
   const input = parseInt('foo', 10)
@@ -30,15 +34,57 @@ test('test runs', () => {
 })
 
 test('parse input params', () => {
-  const parsed = {
-    VARIABLE1: '/good/variable',
-    VARIABLE2: '/another/good/variable',
-    SECRET1: '/good/secret'
-  }
   const params = `
     VARIABLE1=/good/variable
     VARIABLE2=/another/good/variable
     SECRET1=/good/secret
   `
-  expect(parsed == parseParams(params))
+  const parsed = {
+    VARIABLE1: '/good/variable',
+    VARIABLE2: '/another/good/variable',
+    SECRET1: '/good/secret',
+  }
+  expect(parseParams(params)).toStrictEqual(parsed)
+})
+
+jest.mock('@actions/core')
+const mockedExportVariable = jest.mocked(exportVariable)
+const mockedSetSecret = jest.mocked(setSecret)
+
+test('get param values from AWS', async () => {
+  const client = mockClient(SSMClient)
+  client.on(GetParametersCommand).resolves({
+    Parameters: [
+      {
+        Name: "/a/variable",
+        Type: "String",
+        Value: "variable a value",
+      },
+      {
+        Name: "/b/variable",
+        Type: "String",
+        Value: "variable b value",
+      },
+      {
+        Name: "/a/secret",
+        Type: "SecureString",
+        Value: "secret a value",
+      },
+    ]
+  })
+  const parsed = {
+    VARIABLE_A: '/a/variable',
+    VARIABLE_B: '/b/variable',
+    SECRET_A: '/a/secret',
+  }
+  await getParams(parsed)
+  expect(mockedExportVariable.mock.calls).toHaveLength(3)
+  expect(mockedExportVariable.mock.calls[0][0]).toBe('VARIABLE_A')
+  expect(mockedExportVariable.mock.calls[0][1]).toBe('variable a value')
+  expect(mockedExportVariable.mock.calls[1][0]).toBe('VARIABLE_B')
+  expect(mockedExportVariable.mock.calls[1][1]).toBe('variable b value')
+  expect(mockedExportVariable.mock.calls[2][0]).toBe('SECRET_A')
+  expect(mockedExportVariable.mock.calls[2][1]).toBe('secret a value')
+  expect(mockedSetSecret.mock.calls).toHaveLength(1)
+  expect(mockedSetSecret.mock.calls[0][0]).toBe('secret a value')
 })
