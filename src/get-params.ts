@@ -1,7 +1,12 @@
-import {getInput, error, setSecret, exportVariable, info} from "@actions/core"
-import {SSMClient, GetParametersCommand} from "@aws-sdk/client-ssm"
+import {SSMClient, GetParametersCommand} from '@aws-sdk/client-ssm'
 
-export const getParams = async (paramsObj: Record<string, string>) => {
+export type RetrievedParam = {
+  name: string,
+  value: string,
+  secret: boolean,
+}
+
+export const getParams = async (paramsObj: Record<string, string>): Promise<RetrievedParam[]> => {
   const client = new SSMClient({})
   const input = {
     Names: Object.values(paramsObj),
@@ -10,35 +15,37 @@ export const getParams = async (paramsObj: Record<string, string>) => {
   const command = new GetParametersCommand(input)
   const response = await client.send(command)
   const params = response.Parameters
-  if (!params) return
+  var retrieved: RetrievedParam[] = []
+  if (!params) return retrieved
   const envVars = Object.keys(paramsObj)
   for (var i=0; i < params.length; i++) {
     const param = params[i]
-    const value = param.Value
-    if (!value) continue
-    if (param.Type == 'SecureString') {
-      setSecret(value)
-    }
-    exportVariable(envVars[i], value)
+    if (!param.Value) continue
+    retrieved.push({
+      name: envVars[i],
+      value: param.Value,
+      secret: param.Type == 'SecureString',
+    })
   }
+  return retrieved
 }
 
 // { // GetParametersResult
 //   Parameters: [ // ParameterList
 //     { // Parameter
-//       Name: "STRING_VALUE",
-//       Type: "String" || "StringList" || "SecureString",
-//       Value: "STRING_VALUE",
-//       Version: Number("long"),
-//       Selector: "STRING_VALUE",
-//       SourceResult: "STRING_VALUE",
-//       LastModifiedDate: new Date("TIMESTAMP"),
-//       ARN: "STRING_VALUE",
-//       DataType: "STRING_VALUE",
+//       Name: 'STRING_VALUE',
+//       Type: 'String' || 'StringList' || 'SecureString',
+//       Value: 'STRING_VALUE',
+//       Version: Number('long'),
+//       Selector: 'STRING_VALUE',
+//       SourceResult: 'STRING_VALUE',
+//       LastModifiedDate: new Date('TIMESTAMP'),
+//       ARN: 'STRING_VALUE',
+//       DataType: 'STRING_VALUE',
 //     },
 //   ],
 //   InvalidParameters: [ // ParameterNameList
-//     "STRING_VALUE",
+//     'STRING_VALUE',
 //   ],
 // };
 

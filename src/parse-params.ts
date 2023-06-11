@@ -1,4 +1,4 @@
-export function parseParams(params: string): Record<string, string> {
+export const parseParams = (params: string): Record<string, string> => {
   return params.split(/\s+/).reduce<Record<string, string>>((obj, param) => {
     if (!param) return obj
     const splitParam = param.split('=')
