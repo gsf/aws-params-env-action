@@ -1,11 +1,10 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Environment Variables from AWS Parameter Store'
+description: 'Set workflow environment variables from values in AWS Parameter Store.'
+author: 'Sean Fern'
 inputs:
-  milliseconds: # change this
+  params:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'Whitespace-separated parameters of the form ENV_VAR=/aws/parameter/name'
 runs:
   using: 'node16'
   main: 'dist/index.js'
