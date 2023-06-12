@@ -1,6 +1,6 @@
 # AWS Parameter Store Environment Variables
 
-The `aws-params-env-action` sets workflow environment variables from values in AWS SSM Parameter Store. Parameters of type SecureString are masked.
+The `aws-params-env-action` sets workflow environment variables from values in AWS Systems Manager Parameter Store. Parameters of type SecureString are masked.
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@ Add a step to your workflow like this:
       SECRET_X=/secret/param/x
 ```
 
-All steps in the workflow following this step will then have VAR1, ENV_VAR2, and SECRET_X variables in the environment. If SECRET_X is a parameter of type SecureString then it will be masked. This essentially replaces the verbosity and manual masking of a step like this:
+All steps in the workflow following this step will then have VAR1, ENV_VAR2, and SECRET_X variables in the environment with values from the referenced parameters in AWS Systems Manager Parameter Store. If /secret/param/x is a parameter of type SecureString then its value will be masked. This essentially replaces the verbosity and manual masking of a step like this:
 
 ```
 - name: Set env vars
