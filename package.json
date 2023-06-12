@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
+  "name": "aws-params-env-action",
   "version": "0.0.0",
-  "private": true,
-  "description": "TypeScript template action",
+  "private": false,
+  "description": "GitHub Action to set workflow environment variables from values in AWS Parameter Store. Parameters of type SecureString are automatically masked.",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/gsf/aws-params-env-action.git"
   },
   "keywords": [
     "actions",
-    "node",
-    "setup"
+    "aws",
+    "parameters"
   ],
-  "author": "",
+  "author": "Sean Fern",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.0",
