@@ -1,38 +1,10 @@
-import {getInput, error, setSecret, exportVariable, info} from '@actions/core'
-import {mockClient} from 'aws-sdk-client-mock'
 import {SSMClient, GetParametersCommand} from '@aws-sdk/client-ssm'
-import {wait} from '../src/wait'
-import {parseParams} from '../src/parse-params'
-import {getParams} from '../src/get-params'
-import {setEnv} from '../src/set-env'
-import * as process from 'process'
-import * as cp from 'child_process'
-import * as path from 'path'
 import {expect, test, jest} from '@jest/globals'
-
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10)
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number')
-})
-
-test('wait 500 ms', async () => {
-  const start = new Date()
-  await wait(500)
-  const end = new Date()
-  var delta = Math.abs(end.getTime() - start.getTime())
-  expect(delta).toBeGreaterThan(450)
-})
-
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500'
-  const np = process.execPath
-  const ip = path.join(__dirname, '..', 'lib', 'main.js')
-  const options: cp.ExecFileSyncOptions = {
-    env: process.env
-  }
-  console.log(cp.execFileSync(np, [ip], options).toString())
-})
+import {getValues} from '../src/get-values'
+import {mockClient} from 'aws-sdk-client-mock'
+import {parseParams} from '../src/parse-params'
+import {setEnv} from '../src/set-env'
+import {setSecret, exportVariable} from '@actions/core'
 
 test('parse input params', () => {
   const params = `
@@ -75,7 +47,7 @@ test('get param values from AWS', async () => {
     VARIABLE_B: '/b/variable',
     SECRET_A: '/a/secret'
   }
-  const retrieved = await getParams(parsed)
+  const retrieved = await getValues(parsed)
   const expected = [
     {
       name: 'VARIABLE_A',

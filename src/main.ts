@@ -1,16 +1,20 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {parseParams} from './parse-params'
+import {getValues} from './get-values'
+import {setEnv} from './set-env'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const params: string = core.getInput('params')
+    const parsed = parseParams(params)
+    core.debug(`Getting values for these params:\n${parsed}`)
 
     core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
+    const values = await getValues(parsed)
     core.debug(new Date().toTimeString())
 
-    core.setOutput('time', new Date().toTimeString())
+    core.debug(`Values retrieved from AWS. Setting env...`)
+    setEnv(values)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
