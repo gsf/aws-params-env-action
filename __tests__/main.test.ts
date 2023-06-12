@@ -13,9 +13,9 @@ test('parse input params', () => {
     SECRET1=/good/secret
   `
   const parsed = {
-    VARIABLE1: '/good/variable',
-    VARIABLE2: '/another/good/variable',
-    SECRET1: '/good/secret'
+    '/good/variable': 'VARIABLE1',
+    '/another/good/variable': 'VARIABLE2',
+    '/good/secret': 'SECRET1'
   }
   expect(parseParams(params)).toStrictEqual(parsed)
 })
@@ -53,9 +53,9 @@ test('get param values from AWS', async () => {
     ]
   })
   const parsed = {
-    VARIABLE_A: '/a/variable',
-    VARIABLE_B: '/b/variable',
-    SECRET_A: '/a/secret'
+    '/a/variable': 'VARIABLE_A',
+    '/b/variable': 'VARIABLE_B',
+    '/a/secret': 'SECRET_A'
   }
   const retrieved = await getValues(parsed)
   const expected = [

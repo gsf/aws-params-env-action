@@ -11,7 +11,7 @@ export const getValues = async (
 ): Promise<ParamValue[]> => {
   const client = new SSMClient({})
   const input = {
-    Names: Object.values(paramsObj),
+    Names: Object.keys(paramsObj),
     WithDecryption: true
   }
   const command = new GetParametersCommand(input)
@@ -19,12 +19,10 @@ export const getValues = async (
   const params = response.Parameters
   const values: ParamValue[] = []
   if (!params) return values
-  const envVars = Object.keys(paramsObj)
-  for (let i = 0; i < params.length; i++) {
-    const param = params[i]
-    if (!param.Value) continue
+  for (const param of params) {
+    if (!param.Name || !param.Value) continue // Convince typescript these are defined
     values.push({
-      name: envVars[i],
+      name: paramsObj[param.Name],
       value: param.Value,
       secret: param.Type === 'SecureString'
     })

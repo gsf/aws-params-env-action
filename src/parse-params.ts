@@ -7,7 +7,7 @@ export const parseParams = (params: string): Record<string, string> => {
         `Parameter "${param}" is not of the form "ENV_VAR=/aws/param"`
       )
     }
-    obj[splitParam[0]] = splitParam[1]
+    obj[splitParam[1]] = splitParam[0]
     return obj
   }, {})
 }

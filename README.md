@@ -4,7 +4,7 @@ The `aws-params-env-action` sets workflow environment variables from values in A
 
 ## Prerequisites
 
-To use this action, you must have AWS credentials and region configured in the action environment. This can be done by using the [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) step, for example, or by running the action on a self-hosted runner in AWS with an instance profile with the necessary permissions for AWS SSM Parameter Store.
+To use this action, you must have AWS credentials and region configured in the action environment. This can be done by using the [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) step, for example, or by running the action on a self-hosted runner in AWS with an instance profile with permissions for AWS SSM Parameter Store.
 
 ## Usage
 

@@ -21,7 +21,7 @@ const client_ssm_1 = __nccwpck_require__(20341);
 const getValues = (paramsObj) => __awaiter(void 0, void 0, void 0, function* () {
     const client = new client_ssm_1.SSMClient({});
     const input = {
-        Names: Object.values(paramsObj),
+        Names: Object.keys(paramsObj),
         WithDecryption: true
     };
     const command = new client_ssm_1.GetParametersCommand(input);
@@ -30,13 +30,11 @@ const getValues = (paramsObj) => __awaiter(void 0, void 0, void 0, function* () 
     const values = [];
     if (!params)
         return values;
-    const envVars = Object.keys(paramsObj);
-    for (let i = 0; i < params.length; i++) {
-        const param = params[i];
-        if (!param.Value)
-            continue;
+    for (const param of params) {
+        if (!param.Name || !param.Value)
+            continue; // Convince typescript these are defined
         values.push({
-            name: envVars[i],
+            name: paramsObj[param.Name],
             value: param.Value,
             secret: param.Type === 'SecureString'
         });
@@ -146,7 +144,7 @@ const parseParams = (params) => {
         if (!splitParam[0] || !splitParam[1]) {
             throw new Error(`Parameter "${param}" is not of the form "ENV_VAR=/aws/param"`);
         }
-        obj[splitParam[0]] = splitParam[1];
+        obj[splitParam[1]] = splitParam[0];
         return obj;
     }, {});
 };
