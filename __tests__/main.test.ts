@@ -20,6 +20,16 @@ test('parse input params', () => {
   expect(parseParams(params)).toStrictEqual(parsed)
 })
 
+test('error on malformed input params', () => {
+  const params = `
+    /some/variable
+    VAR1=
+  `
+  expect(() => {
+    parseParams(params)
+  }).toThrow()
+})
+
 const client = mockClient(SSMClient)
 
 test('get param values from AWS', async () => {
