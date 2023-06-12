@@ -2,7 +2,7 @@
   "name": "aws-params-env-action",
   "version": "0.0.0",
   "private": false,
-  "description": "GitHub Action to set workflow environment variables from values in AWS Parameter Store. Parameters of type SecureString are automatically masked.",
+  "description": "GitHub Action to set workflow environment variables from values in AWS Parameter Store. Parameters of type SecureString are masked.",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",

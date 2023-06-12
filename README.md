@@ -1,105 +1,40 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+# AWS Parameter Store Environment Variables
 
-# Create a JavaScript Action using TypeScript
+The `aws-params-env-action` sets workflow environment variables from values in AWS SSM Parameter Store. Parameters of type SecureString are masked.
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+## Prerequisites
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
+To use this action, you must have AWS credentials and region configured in the action environment. This can be done by using the [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) step, for example, or by running the action on a self-hosted runner in AWS with an instance profile with the necessary permissions for AWS SSM Parameter Store.
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+## Usage
 
-## Create an action from this template
+Add a step to your workflow like this:
 
-Click the `Use this Template` and provide the new repo details for your action
-
-## Code in Main
-
-> First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
-
-Install the dependencies  
-```bash
-$ npm install
+```
+- name: Set env vars from AWS params
+  uses: gsf/aws-params-env-action@v1
+  with:
+    params: |
+      VAR1=/aws/parameter/a
+      ENV_VAR2=/param/b
+      SECRET_X=/secret/param/x
 ```
 
-Build the typescript and package it for distribution
-```bash
-$ npm run build && npm run package
+All steps in the workflow following this step will then have VAR1, ENV_VAR2, and SECRET_X variables in the environment. If SECRET_X is a parameter of type SecureString then it will be masked. This essentially replaces the verbosity and manual masking of a step like this:
+
 ```
+- name: Set env vars
+  run: |
+    shopt -s expand_aliases # https://github.com/actions/toolkit/issues/766#issuecomment-928305811
+    alias param="aws ssm get-parameter --output text --query Parameter.Value --with-decryption --name"
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
+    parameter_a="$(param /aws/parameter/a)"
+    echo "VAR1=$parameter_a" >> "$GITHUB_ENV"
 
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
+    param_b="$(param /param/b)"
+    echo "ENV_VAR2=$param_b" >> "$GITHUB_ENV"
 
-...
+    secret_x="$(param /secret/param/x)"
+    echo "::add-mask::$secret_x"
+    echo "SECRET_X=$secret_x" >> "$GITHUB_ENV"
 ```
-
-## Change action.yml
-
-The action.yml defines the inputs and output for your action.
-
-Update the action.yml with your name, description, inputs and outputs for your action.
-
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
-
-```yaml
-uses: ./
-with:
-  milliseconds: 1000
-```
-
-See the [actions tab](https://github.com/actions/typescript-action/actions) for runs of this action! :rocket:
-
-## Usage:
-
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action

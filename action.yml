@@ -1,5 +1,5 @@
 name: 'AWS Parameter Store Environment Variables'
-description: 'Set workflow environment variables from values in AWS Parameter Store. Parameters of type SecureString are automatically masked.'
+description: 'Set workflow environment variables from values in AWS Parameter Store. Parameters of type SecureString are masked.'
 author: 'Sean Fern'
 inputs:
   params:
