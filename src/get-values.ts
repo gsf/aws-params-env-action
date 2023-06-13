@@ -1,4 +1,5 @@
 import {SSMClient, GetParametersCommand} from '@aws-sdk/client-ssm'
+import {setFailed} from '@actions/core'
 
 export type ParamValue = {
   name: string
@@ -16,6 +17,10 @@ export const getValues = async (
   }
   const command = new GetParametersCommand(input)
   const response = await client.send(command)
+  const invalid = response.InvalidParameters
+  if (invalid && invalid.length > 0) {
+    setFailed(`Invalid parameters: ${invalid}`)
+  }
   const params = response.Parameters
   const values: ParamValue[] = []
   if (!params) return values
@@ -29,22 +34,3 @@ export const getValues = async (
   }
   return values
 }
-
-// { // GetParametersResult
-//   Parameters: [ // ParameterList
-//     { // Parameter
-//       Name: 'STRING_VALUE',
-//       Type: 'String' || 'StringList' || 'SecureString',
-//       Value: 'STRING_VALUE',
-//       Version: Number('long'),
-//       Selector: 'STRING_VALUE',
-//       SourceResult: 'STRING_VALUE',
-//       LastModifiedDate: new Date('TIMESTAMP'),
-//       ARN: 'STRING_VALUE',
-//       DataType: 'STRING_VALUE',
-//     },
-//   ],
-//   InvalidParameters: [ // ParameterNameList
-//     'STRING_VALUE',
-//   ],
-// };

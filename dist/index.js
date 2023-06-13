@@ -18,6 +18,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getValues = void 0;
 const client_ssm_1 = __nccwpck_require__(20341);
+const core_1 = __nccwpck_require__(42186);
 const getValues = (paramsObj) => __awaiter(void 0, void 0, void 0, function* () {
     const client = new client_ssm_1.SSMClient({});
     const input = {
@@ -26,6 +27,10 @@ const getValues = (paramsObj) => __awaiter(void 0, void 0, void 0, function* () 
     };
     const command = new client_ssm_1.GetParametersCommand(input);
     const response = yield client.send(command);
+    const invalid = response.InvalidParameters;
+    if (invalid && invalid.length > 0) {
+        (0, core_1.setFailed)(`Invalid parameters: ${invalid}`);
+    }
     const params = response.Parameters;
     const values = [];
     if (!params)
@@ -42,24 +47,6 @@ const getValues = (paramsObj) => __awaiter(void 0, void 0, void 0, function* () 
     return values;
 });
 exports.getValues = getValues;
-// { // GetParametersResult
-//   Parameters: [ // ParameterList
-//     { // Parameter
-//       Name: 'STRING_VALUE',
-//       Type: 'String' || 'StringList' || 'SecureString',
-//       Value: 'STRING_VALUE',
-//       Version: Number('long'),
-//       Selector: 'STRING_VALUE',
-//       SourceResult: 'STRING_VALUE',
-//       LastModifiedDate: new Date('TIMESTAMP'),
-//       ARN: 'STRING_VALUE',
-//       DataType: 'STRING_VALUE',
-//     },
-//   ],
-//   InvalidParameters: [ // ParameterNameList
-//     'STRING_VALUE',
-//   ],
-// };
 
 
 /***/ }),
@@ -130,19 +117,20 @@ run();
 /***/ }),
 
 /***/ 14775:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseParams = void 0;
+const core_1 = __nccwpck_require__(42186);
 const parseParams = (params) => {
     return params.split(/\s+/).reduce((obj, param) => {
         if (!param)
             return obj;
         const splitParam = param.split('=');
         if (!splitParam[0] || !splitParam[1]) {
-            throw new Error(`Parameter "${param}" is not of the form "ENV_VAR=/aws/param"`);
+            (0, core_1.setFailed)(`Parameter "${param}" is not of the form "ENV_VAR=/aws/param"`);
         }
         obj[splitParam[1]] = splitParam[0];
         return obj;

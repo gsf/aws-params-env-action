@@ -4,7 +4,12 @@ import {getValues} from '../src/get-values'
 import {mockClient} from 'aws-sdk-client-mock'
 import {parseParams} from '../src/parse-params'
 import {setEnv} from '../src/set-env'
-import {setSecret, exportVariable} from '@actions/core'
+import {exportVariable, setFailed, setSecret} from '@actions/core'
+
+jest.mock('@actions/core')
+const mockedExportVariable = jest.mocked(exportVariable)
+const mockedSetFailed = jest.mocked(setFailed)
+const mockedSetSecret = jest.mocked(setSecret)
 
 test('parse input params', () => {
   const params = `
@@ -20,14 +25,19 @@ test('parse input params', () => {
   expect(parseParams(params)).toStrictEqual(parsed)
 })
 
-test('error on malformed input params', () => {
+test('fail on malformed input params', () => {
   const params = `
     /some/variable
     VAR1=
   `
-  expect(() => {
-    parseParams(params)
-  }).toThrow()
+  parseParams(params)
+  expect(mockedSetFailed.mock.calls).toHaveLength(2)
+  expect(mockedSetFailed.mock.calls[0][0]).toBe(
+    'Parameter "/some/variable" is not of the form "ENV_VAR=/aws/param"'
+  )
+  expect(mockedSetFailed.mock.calls[1][0]).toBe(
+    'Parameter "VAR1=" is not of the form "ENV_VAR=/aws/param"'
+  )
 })
 
 const client = mockClient(SSMClient)
@@ -78,9 +88,28 @@ test('get param values from AWS', async () => {
   expect(retrieved).toStrictEqual(expected)
 })
 
-jest.mock('@actions/core')
-const mockedExportVariable = jest.mocked(exportVariable)
-const mockedSetSecret = jest.mocked(setSecret)
+test('fail on invalid parameter', async () => {
+  client.on(GetParametersCommand).resolves({
+    Parameters: [
+      {
+        Name: '/a/variable',
+        Type: 'String',
+        Value: 'variable a value'
+      }
+    ],
+    InvalidParameters: ['/x/variable', '/y/variable']
+  })
+  const parsed = {
+    '/a/variable': 'VARIABLE_A',
+    '/x/variable': 'VARIABLE_X',
+    '/y/variable': 'VARIABLE_Y'
+  }
+  await getValues(parsed)
+  expect(mockedSetFailed.mock.calls).toHaveLength(1)
+  expect(mockedSetFailed.mock.calls[0][0]).toBe(
+    'Invalid parameters: /x/variable,/y/variable'
+  )
+})
 
 test('set environment variables', () => {
   const retrievedParams = [
