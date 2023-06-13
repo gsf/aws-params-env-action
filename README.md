@@ -4,11 +4,11 @@ The `aws-params-env-action` sets workflow environment variables from values in A
 
 ## Prerequisites
 
-To use this action, you must have AWS credentials and region configured in the action environment. This can be done by using the [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) step, for example, or by running the action on a self-hosted runner in AWS with an instance profile with permissions for AWS SSM Parameter Store.
+To use this action, you must have AWS credentials and region configured in the action environment. This can be done by using the [configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) step, for example, or by running the action on a self-hosted runner in AWS with an instance profile.
 
 ## Usage
 
-Add a step to your workflow like this:
+The only input is `params`, which accepts whitespace-separated pairs of the form "ENV_VAR=/aws/param" where "ENV_VAR" will be the name of a variable added to the environment for subsequent steps in the workflow. The value of that variable will be the value retrieved from AWS Parameter Store for a parameter named "/aws/param". Here is an example step:
 
 ```
 - name: Set env vars from AWS params
@@ -20,7 +20,7 @@ Add a step to your workflow like this:
       SECRET_X=/secret/param/x
 ```
 
-All steps in the workflow following this step will then have VAR1, ENV_VAR2, and SECRET_X variables in the environment with values from the referenced parameters in AWS Systems Manager Parameter Store. If /secret/param/x is a parameter of type SecureString then its value will be masked. This essentially replaces the verbosity and manual masking of a step like this:
+All steps in the workflow following this will have VAR1, ENV_VAR2, and SECRET_X variables in the environment with values from the referenced parameters in AWS Parameter Store. If /secret/param/x is a parameter of type SecureString then its value will be masked. This essentially replaces the verbosity and manual masking of a step like this:
 
 ```
 - name: Set env vars
